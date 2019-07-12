@@ -1,6 +1,7 @@
 # Overview
 The goal of this hands-on lab is for you to turn code that you have developed into a replicated application running on Kubernetes, which is running on Kubernetes Engine. For this lab the code will be a simple Hello World node.js app. Here's a diagram of the various parts in play in this lab. 
-
+Source: [Qwicklab](https://google.qwiklabs.com/focuses/564?parent=catalog)
+ 
 ![Lab diagram](./image/lab-1-1.png "Lab diagram")
 
 Kubernetes is an open source project (available on kubernetes.io) which can run on many different environments, from laptops to high-availability multi-node clusters; from public clouds to on-premise deployments; from virtual machines to bare metal.
