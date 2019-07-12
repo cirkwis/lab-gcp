@@ -1,5 +1,6 @@
 # Overview
 The goal of this hands-on lab is for you to turn code that you have developed into a replicated application running on Kubernetes, which is running on Kubernetes Engine. For this lab the code will be a simple Hello World node.js app. Here's a diagram of the various parts in play in this lab. 
+
 Source: [Qwicklab](https://google.qwiklabs.com/focuses/564?parent=catalog)
  
 ![Lab diagram](./image/lab-1-1.png "Lab diagram")
@@ -19,7 +20,7 @@ For the purpose of this lab, using a managed environment such as Kubernetes Engi
 - Activate Google Cloud Shell
 - Set PROJECT_ID variable via Google Cloud Shell
 ```shell
-PROJECT_ID=$(gcloud config get-value)
+PROJECT_ID=$(gcloud config get-value project)
 ``` 
 
 # Create your Node.js application
