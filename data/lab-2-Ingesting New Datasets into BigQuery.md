@@ -74,3 +74,4 @@ bq load --autodetect --replace [project id]:[dataset name].products gs://data-in
 ```
 
 # Ingest a new dataset from a Google Spreadsheet
+
