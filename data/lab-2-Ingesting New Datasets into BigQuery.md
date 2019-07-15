@@ -75,3 +75,48 @@ bq load --autodetect --replace [project id]:[dataset name].products gs://data-in
 
 # Ingest a new dataset from a Google Spreadsheet
 
+The query belowed shows which products are in the greatest restocking need based on inventory turnover and how quickly they can be resupplied:
+
+```sql
+#standardSQL
+SELECT
+  *,
+  SAFE_DIVIDE(orderedQuantity,stockLevel) AS ratio
+FROM
+  ecommerce.products
+WHERE
+# include products that have been ordered and
+# are 80% through their inventory
+orderedQuantity > 0
+AND SAFE_DIVIDE(orderedQuantity,stockLevel) >= .8
+ORDER BY
+  restockingLeadTime DESC
+```
+
+## Saving Data to Google Sheets and Creating External table in BigQuery
+
+Scenario: You want to provide your supply chain management team with a way to notate whether or not they have contacted the supplier to reorder inventory, and to make any notes on the items. You decide on using a Google Spreadsheet for a quick survey. In Query Results, select Save **Results > Google Sheets**.
+
+![Saving Data to Google Sheets](./image/lab-2-1.png "Saving Data to Google Sheets")
+
+A popup will appear with a link to Open the spreadsheet, select Open. In your spreadsheet, in column G add a new field titled **comments** and for the first product row type new shipment on the way
+
+![Saving Data to Google Sheets (2)](./image/lab-2-2.png "Saving Data to Google Sheets (2)")
+
+In Google Sheets, select Share and Get Shareable Link then copy the link. Return to your BigQuery tab. Click on the ecommerce dataset, then Create Table. Specify the these table options:
+
+- Source:
+  - Create table from: Drive
+  - Select Drive URI: put-your-spreadsheet-url-here
+  - File format: Google Sheet
+- Destination:
+  - Table type: Leave as default (External table)
+  - Table name: products_comments
+  - Schema: Check Auto Detect for Schema and input parameters
+
+# External table performance and data quality considerations
+
+Linking external tables to BigQuery (e.g. Google Spreadsheets or directly from Google Cloud Storage) has several [limitations](https://cloud.google.com/bigquery/external-data-sources#external_data_source_limitations). Two of the most significant are:
+
+- Data consistency is not guaranteed if the data values in the source are changed while querying.
+- Data sources stored outside of BigQuery lose the performance benefits of having BigQuery manage your data storage (including but not limited to auto-optimization of your query execution path, certain wildcard functions are disabled, etc.).
