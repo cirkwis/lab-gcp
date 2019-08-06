@@ -45,3 +45,25 @@ For this lab you will be using multiple SSH sessions.You might want to think abo
 
 ![SSH sessions](./image/lab-1-1.png "SSH sessions")
 
+# Introduction 
+With the announcement of the Google Cloud Confluent managed Kafka offering, it has never been easier to use Google Cloud's great data tools with Kafka. You can use the Apache Beam Kafka.io connector to go straight into Dataflow, but this may not always be the right solution.
+
+Whether Kafka is provisioned in the Cloud or on premise, you might want to push messages to a subset of Pub/Sub topics. Why? For the flexibility of having Pub/Sub as your GCP event notifier. Then you could not only choreograph Dataflow jobs, but also use topics to trigger Cloud Functions.
+
+So how do you exchange messages between Kafka and Pub/Sub? This is where the Pub/Sub Kafka Connector comes in handy. In this lab you will learn the basic steps to start working with a Kafka connector on Google Cloud.
+
+```
+Tip: In this lab Cloud Launcher is used to create a single instance of Kafka. This Kafka instance connects to Cloud Pub/Sub and exchanges event messages between the two services.
+
+In the real world, Kafka would likely be run in a cluster, but for this lab you will develop a simpler (and cheaper) usage pattern.
+```
+
+The following diagram illustrates the high-level architecture for this lab.
+
+![high-level architecture](./image/lab-1-2.png "high-level architecture")
+
+# Configure the Kafka VM instance
+
+## Launch a Kafka instance via Marketplace
+1. In the GCP Console, in the left-hand Navigation menu, click Marketplace.
+2. Locate the Apache Kafka deployment by searching for Kafka.
