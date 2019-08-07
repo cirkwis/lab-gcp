@@ -165,5 +165,5 @@ Now we will setup the Kafka VM Topic
 
 1. Return to the Kafka VM instance (SSH Window A) and submit the following command:
 ```shell
-
+cd /opt/kafka
 ```
