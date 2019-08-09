@@ -108,11 +108,7 @@ sudo chmod +x /opt/kafka/connectors/cps-kafka-connector.jar
 ```shell
 cd /opt/kafka/config
 ```
-8. Using an editor create cps-sink-connector.properties:
-```shell
-sudo nano cps-sink-connector.properties
-```
-9. Add the following content, replacing PROJECT_ID with your GCP Project ID:
+8. Create new file cps-sink-connector.properties with the following content (replacing PROJECT_ID with your GCP Project ID):
 ```shell
 name=CPSSinkConnector
 connector.class=com.google.pubsub.kafka.sink.CloudPubSubSinkConnector
@@ -121,11 +117,7 @@ topics=to-pubsub
 cps.topic=from-kafka
 cps.project=PROJECT_ID
 ```
-10. Using an editor create another file named cps-source-connector.properties:
-```shell
-sudo nano cps-source-connector.properties
-```
-11. Add the following content, replacing PROJECT_ID with your GCP Project ID:
+9. Create new file cps-source-connector.properties with the following content (replacing PROJECT_ID with your GCP Project ID):
 ```shell
 name=CPSSourceConnector
 connector.class=com.google.pubsub.kafka.source.CloudPubSubSourceConnector
@@ -188,4 +180,33 @@ value.converter.schemas.enable=false
 6. Move back to the user home directory
 ```shell
 cd ~
+```
+7. Create new file run-connector.sh
+```shell
+#!/bin/bash
+
+/opt/kafka/bin/connect-standalone.sh /opt/kafka/config/connect-standalone.properties \
+/opt/kafka/config/cps-sink-connector.properties \
+/opt/kafka/config/cps-source-connector.properties
  ```
+8. Update the file permissions to allow it to be executed from the command line: 
+```shell
+sudo chmod +x ./run-connector.sh
+```
+9. Start the connect service
+```shell
+sudo chmod +x ./run-connector.sh
+```
+10. Start the connect service
+```shell
+./run-connector.sh
+```
+The Kafka service should now be running on the VM. Leave this session open so that any errors can be seen.
+
+## Data exchange between Kafka and Pub/Sub
+Test Kafka to Pub/Sub (producer/consumer) communication by opening a new SSH window where the Kafka commands will be run.
+
+1. Open a new SSH connection to the Kafka VM, this is SSH Window B. Enter the following command to initiate a Kafka console:
+```shell
+kafka-console-producer.sh --broker-list localhost:9092 --topic to-pubsub
+```
