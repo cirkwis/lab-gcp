@@ -210,3 +210,99 @@ Test Kafka to Pub/Sub (producer/consumer) communication by opening a new SSH win
 ```shell
 kafka-console-producer.sh --broker-list localhost:9092 --topic to-pubsub
 ```
+2. From the Kafka console enter the following elements to send some message to topic to-pubsub
+```shell
+{"message":"Hello"}
+{"message":"Big Data"}
+```
+3. Return to the Cloud Shell to see the information submitted earlier
+```shell
+gcloud pubsub subcriptions pull from-kafka --auto-ack --limit=10
+```
+Cloud Shell Example Output
+```shell
+┌────────────────────┬─────────────────┬────────────┐
+│        DATA        │    MESSAGE_ID   │ ATTRIBUTES │
+├────────────────────┼─────────────────┼────────────┤
+│ {message=Hello}    │ 169722717841938 │            │
+│ {message=Big Data} │ 169724507782910 │            │
+└────────────────────┴─────────────────┴────────────┘
+```
+Kafka to Pub/Sub messaging is configured and working as expected.
+
+## Test Pub/Sub to Kafka
+1. In SSH Window B, enter the following command:
+```shell
+kafka-console-consumer.sh --bootstrap-server=localhost:9092 --value-deserailizer=org.apache.kafka.common.serialization.StringDeserializer --topic from-pubsub
+```
+2. In the active Cloud Shell window, publish a topic to be consumed by Kafka
+```shell
+gcloud pubsub topics publish to-kafka --attribute=data=hello
+```
+Check SSH Window B for the Kafka VM Example Output
+```shell
+{"message":"","data":"hello"}
+```
+Pub/Sub to Kafka message is configured and working as expected.
+
+## Pub/Sub to Kafka Testing
+Your architecture for testing Pub/Sub to Kafka is as illustrated below: 
+![Pub/Sub to Kafka Testing](./image/lab-1-4.png "Pub/Sub to Kafka Testing")
+```
+Note: Ensure that a Kafka instance is actually running in the background - there should still be an open window showing the output from the instance.
+
+If the application instance is not currently running, open a new SSH connection to Kafka and run the command ./run-connector.sh at the command line.
+```
+1. In the consumer/producer SSH session (SSH Window B), enter the following command to start a kafka consumer listenning topic **from-pubsub**
+ ```shell
+kafka-console-consumer.sh --bootstrap-server=localhost:9092 --value-deserializer=org.apache.kafka.common.serialization.StringDeserializer --topic from-pubsub
+```
+2. From Cloud Shell, you'll create some example content by making file named movies.txt
+```shell
+Deadpool 2
+Avengers Infinity Wars
+Jurassic World Fallen Kingdom
+MI6 Fallout
+Black Panther
+The Incredibles
+Three Billboards Outside of Ebbing Missouri
+A Quiet Place
+Thoroughbreds
+Super Trooper 2
+```
+3. Enter the following script to publish your movie messages to the Kafka consumer via Google Cloud PubSub topic
+ ```shell
+while read i; do gcloud pubsub topics publish to-kafka --attribute=data="$i"; done < movies.txt
+```
+From the above command a stream of messages should be observable on the Kafka consumer window.
+
+In this example we have sent a steam of information between two services. As the example demonstrates, exchanging information once configured is fairly straightforward.
+
+## Kafka to Pub/Sub testing
+Our architecture for testing Kafka to Pub/Sub is illustrated as belowed: 
+![Kafka to Pub/Sub testing](./image/lab-1-5.png "Kafka to Pub/Sub testing")
+1. Cancel actual Kafka running consumer by **Ctr+c** in SSH Window B, then make a text file tv.json and add the following contents: 
+ ```shell
+{"message":"Archer"}
+{"message":"Ozark"}
+{"message":"Star Trek Discovery"}
+{"message":"Westworld"}
+{"message":"The Magicians"}
+{"message":"Legion"}
+{"message":"Cloak and Dagger"}
+{"message":"The Good Place"}
+{"message":"Silicon Valley"}
+{"message":"Mr Robot"}
+{"message":"Rick and Morty"}
+{"message":"Mindhunter"}
+```
+2. Now use the following script to publish your TV messages to the Kafka topic to-pubsub
+ ```shell
+kafka-console-producer.sh --broker-list localhost:9092 --topic to-pubsub < tv.json
+```
+Thanks to Kafka connector, TV messages on the topic to-pubsub are consummed and sent to PubSub topic from-kafka
+3. From the Cloud Shell window, run the following command to view the message that have been published from Kafka: 
+ ```shell
+gcloud pubsub subcriptions pull from-kafka --auto-ack --limit=10
+```
+In this example you have sent a stream of information between two services. When passing information via Kafka, the message content is formatted as JSON. 
