@@ -167,3 +167,25 @@ Now we will setup the Kafka VM Topic
 ```shell
 cd /opt/kafka
 ```
+2. Create a topic that will exchange information to Pub/Sub:
+```shell
+kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic to-pubsub
+```
+3. Create a topic that will receive messages from PubSub
+```shell
+kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic from-pubsub
+```
+4. You need to make a couple of edits to the existing file located in /opt/kafka/config/connect-standalone.properties
+- first, uncomment the plugin path that is located at the bottom of the file and update it to the following
+```shell
+plugin.path=/opt/kafka/connectors
+```
+- Second, toggle the key and value converter for schema enforcement to the setting false, close the editor when you're done
+```shell
+key.converter.schemas.enable=false
+value.converter.schemas.enable=false
+```
+6. Move back to the user home directory
+```shell
+cd ~
+ ```
