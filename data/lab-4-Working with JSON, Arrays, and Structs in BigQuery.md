@@ -3,6 +3,10 @@ BigQuery is Google's fully managed, NoOps, low cost analytics database. With Big
 
 This lab is an in-depth walkthrough of working with semi-structured data (ingesting JSON, Array data types) inside of BigQuery. Denormalizing your schema into a single table with nested and repeated fields can yield performance improvements, but the SQL syntax for working with array data can be tricky. You will pratice loading, querying, troubleshooting and unnesting various semi-structured datasets. 
 
+Reference: 
+- Qwiklabs: [Working with JSON, Arrays, and Structs in BigQuery](https://google.qwiklabs.com/focuses/3696?parent=catalog)
+- Documentation: [Working with Arrays in Standard SQL](https://cloud.google.com/bigquery/docs/reference/standard-sql/arrays)
+
 ## Create a new dataset to store our tables
 In your BigQuery, click on your project name and then Create Dataset named fruit_store. Leave the other options at their default values. 
 
