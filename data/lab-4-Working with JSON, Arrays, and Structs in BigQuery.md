@@ -75,9 +75,7 @@ What if you wanted a list of fruit items for each person at the store? It could 
 
 In traditional relational database SQL, you would look at the repetition of names and immediately think to split the above table into two separate tables: Fruit items and People. That process is called normalization (going from one table to many). This is common approach for transactional databases like MySQL. 
 
-For data warehousing, data analysts often go the reverse direction (denormaization) and bring many separate tables into one large reporting table. 
-
-______________
+For data warehousing, data analysts often go the reverse direction (denormaization) and bring many separate tables into one large reporting table. The potential issues if you stored all your data in one giant table: The table row size could be too large for traditional reporting database. 
 
 Now, you're going to learn a different approach that stores data at different levels of granularity all in one table using repeated fields: 
 
@@ -116,9 +114,7 @@ What looks strange about the previous table?
 - There are multiple field values for Fruit in a single row
 - The people are associated with all of the field values
 
-What the key insight? The **array** data type! 
-
-An easier way to interpret the Fruit array: 
+What the key insight? The **array** data type! An easier way to interpret the Fruit array: 
 
 <table class="tg">
   <tr>
@@ -131,13 +127,6 @@ An easier way to interpret the Fruit array:
     <td class="tg-0lax" rowspan="4">[raspberry, blackberry, cherry, strawberry]</td>
     <td class="tg-0lax" rowspan="4">sally</td>
   </tr>
-  <tr>
-    <td class="tg-0lax" rowspan="2">2</td>
-    <td class="tg-0lax" rowspan="2">[orange,apple]</td>
-    <td class="tg-0lax" rowspan="2">frederick</td>
-  </tr>
-  <tr>
-  </tr>
 </table>
 
 Both of these tables are exactly the same. There are two key learnings:
@@ -148,13 +137,11 @@ Both of these tables are exactly the same. There are two key learnings:
 # Loading semi-structured JSON into BigQuery
 What if you had a JSON file that you needed to ingest into BigQuery?
 
-Create a new table fruit_details in the dataset. 
-
-Add the following details for the table: 
-- Source: Choose GCS in the Create table frop dropdown
-- Select file from GCS bucket: gs://data-insights-course/labs/optimizing-for-performance/shopping_cart.json
-- File format: JSON (Newline delimited)
-- Table name: fruit_details 
+Create a new table fruit_details in the dataset. Add the following details for the table: 
+- **Source**: Choose GCS in the Create table frop dropdown
+- Select file from GCS bucket: **gs://data-insights-course/labs/optimizing-for-performance/shopping_cart.json**
+- **File format**: JSON (Newline delimited)
+- **Table name**: fruit_details 
 - Check the checkbox of **Schema and input parameters**
 
 In the schema, note that fruit_array is marked as REPEATED which means it's an array. 
@@ -177,7 +164,7 @@ GROUP BY fullVisitorId, date
 ORDER BY date
 ```
 
-Next, we will use the ARRAY_LENGTH() function to count the number of pages and products that were viewed. 
+Next, we will use the **ARRAY_LENGTH()** function to count the number of pages and products that were viewed. 
 ```SQL
 SELECT
   fullVisitorId,
@@ -192,7 +179,7 @@ GROUP BY fullVisitorId, date
 ORDER BY date
 ```
 
-Next, lets deduplicate the pages and products so we can see how many unique products were viewed. We'll simply add DISTINCT to our ARRAY_AGG()
+Next, lets deduplicate the pages and products so we can see how many unique products were viewed. We'll simply add **DISTINCT** to our **ARRAY_AGG()**
 ```SQL
 SELECT
   fullVisitorId,
@@ -209,24 +196,20 @@ ORDER BY date
 
 **Recap**
 You can do some pretty useful things with arrays like: 
-- finding the number of elements with ARRAY_LENGTH(<array>)
-- deduplicating elements with ARRAY_AGG(DISTINCT <field>)
-- ordering elements with ARRAY_AGG(<field> ORDER BY <field>)
-- limiting ARRAY_AGG(<field> LIMIT 5)
+- finding the number of elements with **ARRAY_LENGTH(<'array'>)**
+- deduplicating elements with **ARRAY_AGG(DISTINCT <'field'>)**
+- ordering elements with **ARRAY_AGG(<'field'> ORDER BY <'field'>)**
+- limiting **ARRAY_AGG(<'field'> LIMIT 5)**
 
 # Querying datasets that already have ARRAYs
-The BigQuery Public Dataset for Google Analytics bigquery-public-data.google_analytics_sample has many more fields and rows than our course dataset data-to-insights.ecommerce.all_sessions. More importantly, it already stores field values like products, pages, and transactions natively as ARRAYs.
-
-Copy and Paste the below query to explore the available data and see if you can find fields with repeated values (arrays)
+The BigQuery Public Dataset for Google Analytics **bigquery-public-data.google_analytics_sample** has many more fields and rows than our course dataset data-to-insights.ecommerce.all_sessions. More importantly, it already stores field values like products, pages, and transactions natively as ARRAYs. Copy and Paste the below query to explore the available data and see if you can find fields with repeated values (arrays)
 
 ```SQL
 SELECT *
 FROM `bigquery-public-data.google_analytics_sample.ga_sessions_20170801`
 WHERE visitId = 1501570398
 ```
-Scroll right in the results until you see the hits.product.v2ProductName field. You'll note a lot of seemingly 'blank' values in the results as you scroll. 
-
-???????????????????
+Scroll right in the results until you see the **hits.product.v2ProductName** field. You'll note a lot of seemingly 'blank' values in the results as you scroll. The fields that appear to be missing data are actually at a higher level of granularity than other fields
 
 The amount of fields available in the Google Analytics schema can be overwhelming for our analysis. Let's try to query just the visit and page name fields like we did before. 
 
@@ -256,7 +239,7 @@ and we need it to be
 
 How do we do that with SQL?
 
-**Answer:** Use the UNNEST() function on your array field:
+**Answer:** Use the **UNNEST()** function on your array field:
 
 ```SQL
 SELECT DISTINCT
@@ -273,17 +256,15 @@ We'll cover UNNEST() more in detail later but for now just know that:
 - UNNEST() always follows the table name in your FROM clause (think of it conceptually like a pre-joined table)
 
 # Introduction to STRUCTs 
-You may have wondered why the field alias hit.page.pageTitle looks like three fields in one separated by periods. Just as ARRAY values give you the flexibility to go deep into the granularity of your fields, another data type allows you to go wide in your schema by grouping related fields together. That SQL data type is the STRUCT data type. 
+You may have wondered why the field alias hit.page.pageTitle looks like three fields in one separated by periods. Just as **ARRAY** values give you the flexibility to go deep into the granularity of your fields, another data type allows you to go wide in your schema by grouping related fields together. That SQL data type is the **STRUCT** data type. 
 
-The easiest way to think about a STRUCT is to consider it conceptually like a separate table that is already pre-joined into your main table. 
-
-A STRUCT can have: 
+The easiest way to think about a STRUCT is to consider it conceptually like a separate table that is already pre-joined into your main table. A STRUCT can have: 
 - one or many fields in it
 - the same or different data types for each field
 - it's own alias
 
 ## Explore a dataset with STRUCTs
-Under Resources find the bigquery-public-data dataset (https://console.cloud.google.com/bigquery?p=bigquery-public-data&d=google_analytics_sample&t=ga_sessions_20170801&page=table): bigquery-public-data - google_analytics_sample - ga_sessions table. 
+Under Resources find the **bigquery-public-data** dataset (https://console.cloud.google.com/bigquery?p=bigquery-public-data&d=google_analytics_sample&t=ga_sessions_20170801&page=table): **bigquery-public-data -> google_analytics_sample -> ga_sessions table**. 
 
 As you can imagine, there is an incredible amount of website session data stored for a modern ecommerce website. The main advantage of having 32 STRUCTs in a single table is it allows you to run queries like this one without having to do any JOINs:
 
@@ -364,33 +345,20 @@ To recap:
   - In **Schema**, click on Edit as text slider and add the following:
   ```JSON
   [
-    {
-        "name": "race",
-        "type": "STRING",
-        "mode": "NULLABLE"
-    },
+    {"name": "race", "type": "STRING", "mode": "NULLABLE"},
     {
         "name": "participants",
         "type": "RECORD",
         "mode": "REPEATED",
         "fields": [
-            {
-                "name": "name",
-                "type": "STRING",
-                "mode": "NULLABLE"
-            },
-            {
-                "name": "splits",
-                "type": "FLOAT",
-                "mode": "REPEATED"
-            }
+            {"name": "name", "type": "STRING", "mode": "NULLABLE"},
+            {"name": "splits", "type": "FLOAT", "mode": "REPEATED"}
         ]
     }
   ]
   ```
-
-- The **participants** field is the STRUCT because it is of type RECORD
-- The participants.splits field is an array of floats inside of the parent participants struct. It has a REPEATED Mode which indicates an array. Values of that array are called nested values since they are multiple values inside of a single field.
+- The **participants** field is the STRUCT because it is of type **RECORD**
+- The **participants.splits** field is an array of floats inside of the parent participants struct. It has a **REPEATED** Mode which indicates an array. Values of that array are called nested values since they are multiple values inside of a single field.
 
 ## Practice querying nested and repeated fields
 Let's see all of our racers for the 800 Meter race.
@@ -398,9 +366,7 @@ Let's see all of our racers for the 800 Meter race.
 #standardSQL
 SELECT * FROM racing.race_results
 ```
-How many rows were returned?
-
-Answer: 1
+How many rows were returned? Answer: 1
 
 ![800 Meter race](./image/lab-3-2.png "800 Meter race")
 
@@ -501,7 +467,7 @@ Recap of STRUCTs:
 
 - A SQL STRUCT is simply a container of other data fields which can be of different data types. The word struct means data structure. Recall the example from earlier:
 
-  - STRUCT(``"Rudisha" as name, [23.4, 26.3, 26.4, 26.1] as splits``)`` AS runner
+  - ```STRUCT("Rudisha" as name, [23.4, 26.3, 26.4, 26.1] as splits) AS runner```
 
 - STRUCTs are given an alias (like runner above) and can conceptually be thought of as a table inside of your main table.
 
@@ -509,32 +475,32 @@ Recap of STRUCTs:
 
 # Lab practices
 - Task: Write a query to COUNT how many racers were there in total.
-```SQL
-#standardSQL
-SELECT COUNT(p.name) AS racer_count
-FROM racing.race_results AS r, UNNEST(r.participants) AS p
-```
-- Write a query that will list the total race time for racers whose names begin with R. Order the results with the fastest total time first. Use the UNNEST() operator and start with the partially written query below.
-```SQL
-#standardSQL
-SELECT
-  p.name,
-  SUM(split_times) as total_race_time
-FROM racing.race_results AS r
-, UNNEST(r.participants) AS p
-, UNNEST(p.splits) AS split_times
-WHERE p.name LIKE 'R%'
-GROUP BY p.name
-ORDER BY total_race_time ASC;
-```
-- You happened to see that the fastest lap time recorded for the 800 M race was 23.2 seconds, but you did not see which runner ran that particular lap. Create a query that returns that result.
-```SQL
+  ```SQL
   #standardSQL
+  SELECT COUNT(p.name) AS racer_count
+  FROM racing.race_results AS r, UNNEST(r.participants) AS p
+  ```
+- Write a query that will list the total race time for racers whose names begin with R. Order the results with the fastest total time first. Use the UNNEST() operator and start with the partially written query below.
+    ```SQL
+    #standardSQL
     SELECT
+      p.name,
+      SUM(split_times) as total_race_time
+    FROM racing.race_results AS r
+    , UNNEST(r.participants) AS p
+    , UNNEST(p.splits) AS split_times
+    WHERE p.name LIKE 'R%'
+    GROUP BY p.name
+    ORDER BY total_race_time ASC;
+    ```
+- You happened to see that the fastest lap time recorded for the 800 M race was 23.2 seconds, but you did not see which runner ran that particular lap. Create a query that returns that result.
+  ```SQL
+  #standardSQL
+  SELECT
     p.name,
     split_time
-    FROM racing.race_results AS r
-        , UNNEST(r.participants) AS p
-        , UNNEST(p.splits) AS split_time
-    WHERE split_time = 23.2;
-```
+  FROM racing.race_results AS r
+        ,UNNEST(r.participants) AS p
+        ,UNNEST(p.splits) AS split_time
+  WHERE split_time = 23.2;
+  ```
